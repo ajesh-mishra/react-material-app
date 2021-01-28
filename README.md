@@ -12,4 +12,4 @@ $ npm install
 ```
 $ npm start
 ```
-* App should launch locally on http://localhost:3000/
+* App should launch automatically on http://localhost:3000/
