@@ -1,6 +1,6 @@
 # react-material-app
 This is a simple To-Do App built with **React** and **Material UI**.
-![presentin.vim ascii demo](https://gfycat.com/nimblehastygourami)
+![presentin.vim ascii demo](app-demo.gif)
 
 # Usage
 
