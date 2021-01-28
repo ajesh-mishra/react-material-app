@@ -4,10 +4,6 @@ This is a simple To-Do App built with **React** and **Material UI**.
 
 # Usage
 
-*
-```
-:PresentingStart
-```
 * Install Dependencies
 ```
 $ npm install
@@ -16,3 +12,4 @@ $ npm install
 ```
 $ npm start
 ```
+* App should launch locally on http://localhost:3000/
