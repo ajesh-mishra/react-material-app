@@ -1,0 +1,122 @@
+# Run Dgraph zero
+docker run -it -p 5080:5080 -p 6080:6080 -p 8080:8080 \
+  -p 9080:9080 -p 8000:8000 -v ~/dgraph:/dgraph --name dgraph \
+  dgraph/dgraph:v20.11.0 dgraph zero
+
+# In another terminal, now run Dgraph alpha
+docker exec -it dgraph dgraph alpha --cache_mb 2048 --zero localhost:5080 --whitelist 0.0.0.0/0
+
+# And in another, run ratel (Dgraph UI)
+docker exec -it dgraph dgraph-ratel
+
+# Run Dgraph standalone
+docker run -it -p 5080:5080 -p 6080:6080 -p 8080:8080 \
+  -p 9080:9080 -p 8000:8000 -v ~/dgraph:/dgraph --name dgraph \
+  dgraph/standalone:v20.11.0
+
+
+# Define Types
+type Person {
+    name
+    age
+    friend
+    owns_pet
+}
+
+type Animal {
+    name
+}
+
+# Define Directives and index
+name: string @index(term) @lang .
+age: int @index(int) .
+friend: [uid] @count .
+owns_pet: [uid] .
+
+query {
+  search_with_UID(func: uid("0x271f")) {
+    name
+    age
+  }
+}
+
+const QUERY = gql`
+  query getAllMovies {
+    get_all_movies(name: "Michael") {
+      name
+      age
+    }
+  }
+`;
+
+query {
+  michaels_friends_and_their_pets(func: eq(name, "Michael")) {
+    uid
+    name
+    age
+    owns_pet {
+      name
+    }
+    friend {
+      name@.
+      owns_pet {
+      	name
+    	}
+    }
+  }
+}
+
+schema(pred: [name, age, friend, owns_pet]) {
+  type
+  index
+}
+
+query {
+  michael_friends_and(func: allofterms(name@., "Michael")) {
+    name
+    age
+    number_of_friends : count(friend)                   // Alias and Count Func
+    friend (orderasc: name@., offset: 1, first: 2) {    // Pagination
+    friend (orderasc: age) {                            // Ascending Order
+    friend @filter(ge(age, 27) AND le(age, 48)) {       // Using AND OR with @filter
+      name@.
+      age
+    }
+  }
+}
+
+query {
+  lots_of_friends_in_20s(func: ge(count(friend), 2)) @filter(ge(age, 20) AND le(age, 29)){
+    name@.
+    age
+    friend {
+      name@.
+    }
+  }
+}
+
+// With the @cascade directive, friends of Michael that 
+// 2don’t own a pet are not included in the result.
+query {
+  michael_friends_with_pets(func: allofterms(name@., "Michael")) @cascade {
+    name
+    age
+    friend {
+      name@.
+      owns_pet
+    }
+  }
+}
+
+query {
+ get_all_movies(func: has(running_time)) {
+   name
+ 	 running_time
+  }
+}
+
+query {
+  search_actor(func: allofterms(name, "Luke")) {
+    name
+  }
+}
